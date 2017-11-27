@@ -103,3 +103,6 @@ ENV/
 # venv
 Scripts/
 pyvenv.cfg
+
+# pip
+pip-selfcheck.json
