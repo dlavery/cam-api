@@ -106,3 +106,6 @@ pyvenv.cfg
 
 # pip
 pip-selfcheck.json
+
+# OSX
+.DS_Store
