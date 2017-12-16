@@ -109,3 +109,6 @@ pip-selfcheck.json
 
 # OSX
 .DS_Store
+
+# Logs
+*.log
