@@ -22,6 +22,7 @@ def addTask():
         if ('notbefore' in request.json):
             task.notbefore = request.json['notbefore']
         task_id = task.create()
+        app.logger.error("success: " + task_id)
         return jsonify({'_id' : task_id})
     except ModelException as model_err:
         app.logger.error(str(model_err))
