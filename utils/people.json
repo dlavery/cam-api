@@ -1,0 +1,46 @@
+{
+  "people": [
+    {
+      "name": "FRED",
+      "age": 67,
+      "music": "STORMZY",
+      "TV": "NEWS",
+      "bedtime": 11
+    },
+    {
+      "name": "GINGER",
+      "age": 53,
+      "music": "ABBA",
+      "TV": "ONE SHOW",
+      "bedtime": 11
+    },
+    {
+      "name": "SID",
+      "age": 92,
+      "music": "VERA LYN",
+      "TV": "SEX AND THE CITY",
+      "bedtime": 9
+    },
+    {
+      "name": "NANCY",
+      "age": 83,
+      "music": "DEEP PURPLE",
+      "TV": "ONE SHOW",
+      "bedtime": 9
+    },
+    {
+      "name": "BRAD",
+      "age": 55,
+      "music": "NIRVANA",
+      "TV": "THE LATE SHOW",
+      "bedtime": 12
+    },
+    {
+      "name": "ANGELINA",
+      "age": 45,
+      "music": "SPICE GIRLS",
+      "TV": "ONE SHOW",
+      "bedtime": 8
+    }
+  ]
+}

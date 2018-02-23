@@ -1,0 +1,50 @@
+{
+  "rules": [
+    {
+      "then": {
+        "status": "YOUNG"
+      }
+    },
+    {
+      "when": {
+        "or": {
+          "age": ["GT", 65],
+          "music": ["EQ", "ABBA"]
+        }
+      },
+      "then": {
+        "status": "OLD"
+      }
+    },
+    {
+      "when": {
+        "and": {
+          "TV": ["EQ", "ONE SHOW"],
+          "bedtime": ["LT", 10]
+        }
+      },
+      "then": {
+        "status": "VERY OLD"
+      }
+    },
+    {
+      "when": {
+          "and": {
+            "age": ["GT", 90],
+            "music": ["EQ", "VERA LYN"]
+          }
+      },
+      "then": {
+        "status": "ANCIENT"
+      }
+    },
+    {
+      "when": {
+        "music": ["EQ", "STORMZY"]
+      },
+      "then": {
+        "status": "COOL"
+      }
+    }
+  ]
+}

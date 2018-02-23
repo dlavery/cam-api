@@ -1,0 +1,10 @@
+{
+  "people": [
+    {
+      "name": "FRED",
+      "age": 67,
+      "music": "STORMZY",
+      "TV": "NEWS",
+      "bedtime": 11
+    }  ]
+}
