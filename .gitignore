@@ -112,3 +112,6 @@ pip-selfcheck.json
 
 # Logs
 *.log
+
+# Local
+bin/
