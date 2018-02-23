@@ -1,5 +1,5 @@
 from app import app
-from flask import request
+from flask import request, escape
 from flask import jsonify
 from models import Task
 from models import ModelException
@@ -15,14 +15,15 @@ def addTask():
     """
     try:
         task = Task()
-        task.title = request.json['title']
-        task.description = request.json['description']
+        task.title = escape(request.json['title'])
+        task.description = escape(request.json['description'])
         task.url = request.json['url']
-        task.tags = request.json['tags']
+        task.tags = escape(request.json['tags'])
+        if ('priority' in request.json):
+            task.priority = escape(request.json['priority'])
         if ('notbefore' in request.json):
-            task.notbefore = request.json['notbefore']
+            task.notbefore = escape(request.json['notbefore'])
         task_id = task.create()
-        app.logger.error("success: " + task_id)
         return jsonify({'_id' : task_id})
     except ModelException as model_err:
         app.logger.error(str(model_err))

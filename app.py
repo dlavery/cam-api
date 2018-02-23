@@ -1,21 +1,28 @@
 from flask import Flask
 from flask_pymongo import PyMongo
-from logging import Formatter
-from logging import FileHandler
+import configparser
+import logging
+
+# Value mapping
+LOG_LEVELS = {'INFO': logging.INFO, 'DEBUG': logging.DEBUG, 'WARN': logging.DEBUG, 'ERROR': logging.ERROR}
 
 # Create application
 app = Flask(__name__)
 
 # Read external config
-app.config['MONGO_DBNAME'] = 'cam'
-app.config['MONGO_URI'] = 'mongodb://localhost:27017/cam'
-logfile = '/usr/local/var/log/cam-api.log'
+config = configparser.ConfigParser()
+config.read('cam-api.cfg')
+app.config['MONGO_DBNAME'] = config['DATABASE']['dbName']
+app.config['MONGO_URI'] = config['DATABASE']['dbURI']
+logfile = config['LOGGING']['logFile']
+loglevel = LOG_LEVELS[config['LOGGING']['logLevel']]
 
 # Set up logging
-fh = FileHandler(logfile, mode='a', encoding='utf8', delay=False)
-fmt = Formatter('%(asctime)s %(levelname)s %(filename)s %(lineno)d %(message)s')
+fh = logging.FileHandler(logfile, mode='a', encoding='utf8', delay=False)
+fmt = logging.Formatter('%(asctime)s %(levelname)s %(filename)s %(lineno)d %(message)s')
 fh.setFormatter(fmt)
 app.logger.addHandler(fh)
+app.logger.setLevel(loglevel)
 
 # Set up database
 mongo = PyMongo(app)
