@@ -19,6 +19,7 @@ def addTask():
         task.description = escape(request.json['description'])
         task.url = request.json['url']
         task.tags = escape(request.json['tags'])
+        task.origin = escape(request.json['origin'])
         if ('priority' in request.json):
             task.priority = escape(request.json['priority'])
         if ('notbefore' in request.json):

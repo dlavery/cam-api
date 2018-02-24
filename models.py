@@ -25,6 +25,7 @@ class Task:
         self.title = ''
         self.description = ''
         self.url = ''
+        self.origin = ''
         self.tags = ''
         self.notbefore = today
         self.status = self.PENDING_STATUS
@@ -33,22 +34,28 @@ class Task:
         self.cryptokey = config['CRYPTO']['cryptoKey']
 
     def create(self):
-        if not self.validate():
-            raise ModelException("invalid task")
+        err = self.validate()
+        if err:
+            raise ModelException(err)
         crypto = Fernet(self.cryptokey)
-        task_id = self.tasks_db.insert({'title': self.title, 'description': crypto.encrypt(self.description.encode()).decode(), 'url': self.url, 'tags': self.tags, 'notbefore': self.notbefore, 'priority': self.TASK_PRIORITIES[self.priority], 'status': self.status, 'statusdate': self.statusdate, 'timestamp': datetime.utcnow().timestamp() })
+        task_id = self.tasks_db.insert({'title': crypto.encrypt(self.title.encode()).decode(), 'description': crypto.encrypt(self.description.encode()).decode(), 'url': self.url, 'origin': self.origin, 'tags': self.tags, 'notbefore': self.notbefore, 'priority': self.TASK_PRIORITIES[self.priority], 'status': self.status, 'statusdate': self.statusdate, 'timestamp': datetime.utcnow().timestamp() })
         return str(task_id)
 
     def validate(self):
-        if (not self.title
-        or not self.description
-        or not self.url
-        or not self.tags):
-            return False
+        if not self.title:
+            return "title is mandatory"
+        elif not self.description:
+            return "description is mandatory"
+        elif not self.url:
+            return "url is mandatory"
+        elif not self.tags:
+            return "tags is mandatory"
+        elif not self.origin:
+            return "origin is mandatory"
         elif (self.priority not in self.TASK_PRIORITIES):
-            return False
-        elif (url(self.url)):
-            return True
+            return "priority must be high, medium or low"
+        elif not url(self.url):
+            return "invalid task url"
         else:
             return False
 
