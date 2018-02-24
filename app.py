@@ -16,13 +16,14 @@ app.config['MONGO_DBNAME'] = config['DATABASE']['dbName']
 app.config['MONGO_URI'] = config['DATABASE']['dbURI']
 logfile = config['LOGGING']['logFile']
 loglevel = LOG_LEVELS[config['LOGGING']['logLevel']]
+runPort = config['PORT']['port']
 
 # Set up logging
 fh = logging.FileHandler(logfile, mode='a', encoding='utf8', delay=False)
 fmt = logging.Formatter('%(asctime)s %(levelname)s %(filename)s %(lineno)d %(message)s')
 fh.setFormatter(fmt)
-app.logger.addHandler(fh)
 app.logger.setLevel(loglevel)
+app.logger.addHandler(fh)
 
 # Set up database
 mongo = PyMongo(app)

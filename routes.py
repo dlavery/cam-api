@@ -15,11 +15,16 @@ def addTask():
     """
     try:
         task = Task()
-        task.title = escape(request.json['title'])
-        task.description = escape(request.json['description'])
-        task.url = request.json['url']
-        task.tags = escape(request.json['tags'])
-        task.origin = escape(request.json['origin'])
+        if 'title' in request.json:
+            task.title = escape(request.json['title'])
+        if 'description' in request.json:
+            task.description = escape(request.json['description'])
+        if 'url' in request.json:
+            task.url = request.json['url']
+        if 'tags' in request.json:
+            task.tags = escape(request.json['tags'])
+        if 'origin' in request.json:
+            task.origin = escape(request.json['origin'])
         if ('priority' in request.json):
             task.priority = escape(request.json['priority'])
         if ('notbefore' in request.json):

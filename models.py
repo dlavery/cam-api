@@ -18,10 +18,19 @@ class Task:
     IN_PROGRESS_STATUS = "IN_PROGRESS"
     COMPLETE_STATUS = "COMPLETE"
 
+    # DB parameters
+    INDEX_ASCENDING = 1
+    INDEX_DESCENDING = -1
+
     def __init__(self):
         today = date.today().isoformat()
         priorities = {v: k for k, v in self.TASK_PRIORITIES.items()}
         self.tasks_db = mongo.db.tasks
+        self.tasks_db.create_index([('status', self.INDEX_ASCENDING),
+            ('notbefore', self.INDEX_ASCENDING),
+            ('priority', self.INDEX_ASCENDING),
+            ('timestamp', self.INDEX_ASCENDING)],
+            unique=False, background=True)
         self.title = ''
         self.description = ''
         self.url = ''
