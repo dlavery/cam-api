@@ -25,9 +25,9 @@ class TestRuleSet(unittest.TestCase):
                 self.assertEqual(result['status'], 'ANCIENT')
             elif result['name'] == 'NANCY':
                 self.assertEqual(result['status'], 'VERY OLD')
-            elif result['name'] == 'BRAD':
+            elif result['name'] == 'JOE':
                 self.assertEqual(result['status'], 'YOUNG')
-            elif result['name'] == 'ANGELINA':
+            elif result['name'] == 'FLO':
                 self.assertEqual(result['status'], 'VERY OLD')
 
 if __name__ == '__main__':

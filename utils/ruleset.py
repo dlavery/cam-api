@@ -57,7 +57,6 @@ class RuleSet:
                         return False
                     elif v1 == True:
                         satisfied = True
-                #when['or'] = satisfied
                 return satisfied
             elif k == 'and':
                 satisfied = True
@@ -66,7 +65,6 @@ class RuleSet:
                         return False
                     elif v1 == False:
                         satisfied = False
-                #when['and'] = satisfied
                 return satisfied
             else:
                 if type(v) == bool:
