@@ -29,6 +29,8 @@ class TestRuleSet(unittest.TestCase):
                 self.assertEqual(result['status'], 'YOUNG')
             elif result['name'] == 'FLO':
                 self.assertEqual(result['status'], 'VERY OLD')
+            elif result['name'] == 'REG':
+                self.assertEqual(result['status'], 'WEIRD')
 
 if __name__ == '__main__':
     unittest.main()

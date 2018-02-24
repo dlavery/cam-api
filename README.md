@@ -24,7 +24,10 @@ The utility was created as a test prior to developing the API's data handling ca
 ### ruleset
 A simplified rules engine based on a set of JSON-encoded rules and a 'when/then' pattern with support for 'and/or' clauses. The automated tests classify people into an age category based on a set of characteristics; a default category can be applied using a 'then' without a 'when'. The engine was created to assist with the assignment of tasks to work queues in the API.
 
-The ruleset has a number of drawbacks for more general use:
-* There is no recursion in the and/or check, nested 'and' or 'or' clauses will result in the condition evaluating to false
-* Only a single clause is considered per 'when' condition, others are ignored; use an 'and' or 'or' clause to evaluate multiple conditions
+The ruleset has features for more general use:
+* Recursive conditional check meaning nested 'and' or 'or' clauses are supported
+* Comparison operators [NULL, IN, EQ, LT, GT, LE, GE] are supported
+* A 'then' clause without a 'when' can be used for default values
+
+The ruleset has the following drawback:
 * The subject to which a ruleset applies must have a flat attribute structure, currently nested JSON objects are not supported.

@@ -19,6 +19,11 @@ class RuleSet:
             if when[0] == 'NULL':
                 if attr not in self.subject:
                     self.current_node[attr] = True
+            elif when[0] == 'IN':
+                if self.subject[attr] in when[1]:
+                    self.current_node[attr] = True
+                else:
+                    self.current_node[attr] = False
             elif when[0] == 'EQ':
                 if self.subject[attr] == when[1]:
                     self.current_node[attr] = True
@@ -49,28 +54,21 @@ class RuleSet:
             pass
 
     def process_andor(self, when):
+        andor = {'and': True, 'or': False}
         for k, v in when.items():
-            if k == 'or':
-                satisfied = False
+            if k in andor:
+                res = andor[k]
                 for k1, v1 in v.items():
                     if type(v1) == dict:
-                        return False
-                    elif v1 == True:
-                        satisfied = True
-                return satisfied
-            elif k == 'and':
-                satisfied = True
-                for k1, v1 in v.items():
-                    if type(v1) == dict:
-                        return False
-                    elif v1 == False:
-                        satisfied = False
-                return satisfied
+                        if self.process_andor(v1) == (not andor[k]):
+                            res = (not andor[k])
+                    elif (type(v1) == bool and v1 == (not andor[k])):
+                        res = (not andor[k])
+            elif type(v) == bool:
+                res = v
             else:
-                if type(v) == bool:
-                    return v
-                else:
-                    continue
+                continue
+        return res
 
     def process_then(self, rule):
         if 'then' in rule:
@@ -88,12 +86,3 @@ class RuleSet:
             else:
                 self.process_then(rule)
         return self.subject
-
-if __name__ == '__main__':
-    with open('people.json') as f1:
-        people_data = json.load(f1)
-    for person in people_data['people']:
-        with open('rules.json') as f2:
-            rules_data = json.load(f2)
-        rs = RuleSet(rules_data)
-        print(rs.evaluate(person))

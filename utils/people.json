@@ -41,6 +41,13 @@
       "music": "SPICE GIRLS",
       "TV": "ONE SHOW",
       "bedtime": 8
+    },
+    {
+      "name": "REG",
+      "age": 32,
+      "music": "ONE DIRECTION",
+      "TV": "ONE SHOW",
+      "bedtime": 7
     }
   ]
 }

@@ -40,6 +40,20 @@
     },
     {
       "when": {
+        "and": {
+          "or": {
+            "TV": ["IN", ["ONE SHOW", "SEX AND THE CITY"]],
+            "music": ["EQ", "ONE DIRECTION"]
+          },
+          "bedtime": ["LT", 8]
+        }
+      },
+      "then": {
+        "status": "WEIRD"
+      }
+    },
+    {
+      "when": {
         "music": ["EQ", "STORMZY"]
       },
       "then": {
