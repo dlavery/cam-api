@@ -26,4 +26,5 @@ A simplified rules engine based on a set of JSON-encoded rules and a 'when/then'
 
 The ruleset has a number of drawbacks for more general use:
 * There is no recursion in the and/or check, nested 'and' or 'or' clauses will result in the condition evaluating to false
-* Only a single clause is considered per 'when' condition, others are ignored; use an 'and' or 'or' clause to evaluate multiple conditions.
+* Only a single clause is considered per 'when' condition, others are ignored; use an 'and' or 'or' clause to evaluate multiple conditions
+* The subject to which a ruleset applies must have a flat attribute structure, currently nested JSON objects are not supported.
