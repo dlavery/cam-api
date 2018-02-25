@@ -8,12 +8,12 @@ class RuleSet:
     def __init__(self, data):
         self.data = data
 
-    def process_when(self, attr, when):
+    def evaluate_conditions(self, attr, when):
         if type(when) is dict:
             # process recursively
             for k, v in when.items():
                 self.current_node = when
-                self.process_when(k, v)
+                self.evaluate_conditions(k, v)
         elif type(when) is list:
             # evaluate conditions
             if when[0] == 'NULL':
@@ -53,14 +53,14 @@ class RuleSet:
             # ignore unexpected elements
             pass
 
-    def process_andor(self, when):
+    def evaluate_when(self, when):
         andor = {'and': True, 'or': False}
         for k, v in when.items():
             if k in andor:
                 res = andor[k]
                 for k1, v1 in v.items():
                     if type(v1) == dict:
-                        if self.process_andor(v1) == (not andor[k]):
+                        if self.evaluate_when(v1) == (not andor[k]):
                             res = (not andor[k])
                     elif (type(v1) == bool and v1 == (not andor[k])):
                         res = (not andor[k])
@@ -70,7 +70,7 @@ class RuleSet:
                 continue
         return res
 
-    def process_then(self, rule):
+    def action_then(self, rule):
         if 'then' in rule:
             for k, v in rule['then'].items():
                 self.subject[k] = v
@@ -80,9 +80,9 @@ class RuleSet:
         self.subject = subject
         for rule in self.ruleset:
             if 'when' in rule:
-                self.process_when('when', rule['when'])
-                if self.process_andor(rule['when']):
-                    self.process_then(rule)
+                self.evaluate_conditions('when', rule['when'])
+                if self.evaluate_when(rule['when']):
+                    self.action_then(rule)
             else:
-                self.process_then(rule)
+                self.action_then(rule)
         return self.subject
