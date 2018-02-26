@@ -59,10 +59,7 @@
             "TV": ["IN", ["GOGGLEBOX", "TAKE ME OUT"]],
             "music": ["IN", ["OASIS", "BLUR"]]
           },
-          "or": {
-            "age": ["GT", 35],
-            "bedtime": ["LE", 10]
-          }
+          "age": ["GT", 35]
         }
       },
       "then": {

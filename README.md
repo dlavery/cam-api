@@ -30,4 +30,5 @@ The ruleset has features for more general use:
 * A 'then' clause without a 'when' can be used for default values.
 
 The ruleset has the following drawback:
-* The subject to which a ruleset applies must have a flat attribute structure, currently nested JSON objects are not supported.
+* The subject to which a ruleset applies must have a flat attribute structure, currently nested JSON objects are not supported
+* Beware, when nesting, using the same JSON attribute twice within the same context (i.e. multiple 'and's or 'or's at the same level in the same 'when') - this causes addressing issues and inaccurate results.
