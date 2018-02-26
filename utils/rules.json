@@ -54,6 +54,23 @@
     },
     {
       "when": {
+        "and": {
+          "or": {
+            "TV": ["IN", ["GOGGLEBOX", "TAKE ME OUT"]],
+            "music": ["IN", ["OASIS", "BLUR"]]
+          },
+          "or": {
+            "age": ["GT", 35],
+            "bedtime": ["LE", 10]
+          }
+        }
+      },
+      "then": {
+        "status": "MIDDLE AGED"
+      }
+    },
+    {
+      "when": {
         "music": ["EQ", "STORMZY"]
       },
       "then": {

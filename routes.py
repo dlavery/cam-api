@@ -38,8 +38,18 @@ def addTask():
         app.logger.error(str(system_err))
         return "Unexpected error", 500
 
-@app.route('/tasks/{<string:id>', methods=['GET'])
+@app.route('/tasks/<string:id>', methods=['GET'])
 def getTask(id):
     """
     Retrieve a task from the tasks collection
     """
+    try:
+        task = Task()
+        res = task.read(id)
+        if not res:
+            return "Not found", 404
+        return jsonify(res)
+
+    except Exception as system_err:
+        app.logger.error(str(system_err))
+        return "Unexpected error", 500
