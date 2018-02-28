@@ -48,6 +48,20 @@
       "music": "ONE DIRECTION",
       "TV": "ONE SHOW",
       "bedtime": 7
+    },
+    {
+      "name": "BRIAN",
+      "age": 62,
+      "music": "MORRISEY",
+      "TV": ["EASTENDERS", "CORRIE", "EMMERDALE"],
+      "bedtime": 10
+    },
+    {
+      "name": "ELSIE",
+      "age": 59,
+      "music": ["EAGLES", "GRATEFUL DEAD"],
+      "TV": "none",
+      "bedtime": 10
     }
   ]
 }

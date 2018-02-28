@@ -26,7 +26,7 @@ A simplified rules engine based on a set of JSON-encoded rules and a 'when/then'
 
 The ruleset has features for more general use:
 * Recursive conditional check meaning nested 'and' or 'or' clauses are supported
-* Comparison operators [NULL, IN, EQ, LT, GT, LE, GE] are supported
+* Comparison operators [NULL, ALL, ANY, IN, EQ, LT, GT, LE, GE] are supported
 * A 'then' clause without a 'when' can be used for default values.
 
 The ruleset has the following drawback:

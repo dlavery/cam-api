@@ -15,8 +15,8 @@ class TestAPI(unittest.TestCase):
             'title': 'news',
             'description': 'check the news',
             'url': 'http://bbc.co.uk/news',
-            'origin': 'UK',
-            'tags': '#news',
+            'origin': 'head office',
+            'tags': '#news #uk',
             'notbefore': today,
             'priority': 'high'
         }
@@ -31,8 +31,9 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(data['title'], 'news')
         self.assertEqual(data['description'], 'check the news')
         self.assertEqual(data['url'], 'http://bbc.co.uk/news')
-        self.assertEqual(data['origin'], 'UK')
-        self.assertEqual(data['tags'], '#news')
+        self.assertEqual(data['origin'], 'head office')
+        self.assertIn('#news', data['tags'])
+        self.assertIn('#uk', data['tags'])
         self.assertEqual(data['notbefore'], today)
         self.assertEqual(data['priority'], 'high')
         self.assertEqual(data['status'], 'PENDING')

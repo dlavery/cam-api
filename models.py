@@ -1,3 +1,4 @@
+import re
 from app import mongo
 from app import config
 from datetime import date
@@ -53,7 +54,7 @@ class Task:
             'description': crypto.encrypt(self.description.encode()).decode(),
             'url': self.url,
             'origin': self.origin,
-            'tags': self.tags,
+            'tags': re.split('\s+', self.tags),
             'notbefore': self.notbefore,
             'priority': self.TASK_PRIORITIES[self.priority],
             'status': self.status,

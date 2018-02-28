@@ -1,0 +1,17 @@
+{
+  "rules": [
+    {
+      "then": {
+        "queueName": "General"
+      }
+    },
+    {
+      "when": {
+        "tags": ["ANY", ["STORMZY"]]
+      },
+      "then": {
+        "queueName": "News Team"
+      }
+    }
+  ]
+}

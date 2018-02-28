@@ -68,6 +68,23 @@
     },
     {
       "when": {
+        "TV": ["ALL", ["EASTENDERS", "EMMERDALE", "CORRIE"]]
+      },
+      "then": {
+        "status": "DEAD"
+      }
+    },
+    {
+      "when": {
+        "music": ["ANY", ["GRATEFUL DEAD", "FAIRPORT CONVENTION", "MAMMAS AND PAPPAS"]]
+      },
+      "then": {
+        "status": "OLD HIPPY",
+        "nickname": "Hippy"
+      }
+    },
+    {
+      "when": {
         "music": ["EQ", "STORMZY"]
       },
       "then": {
