@@ -28,9 +28,8 @@ class Task:
         today = date.today().isoformat()
         self.PRIORITIES = {v: k for k, v in self.TASK_PRIORITIES.items()}
         self.tasks_db = mongo.db.tasks
-        self.tasks_db.create_index([('status', self.INDEX_ASCENDING),
-            ('notbefore', self.INDEX_ASCENDING),
-            ('priority', self.INDEX_ASCENDING),
+        self.tasks_db.create_index([
+            ('status', self.INDEX_ASCENDING),
             ('timestamp', self.INDEX_ASCENDING)],
             unique=False, background=True)
         self.title = ''
@@ -87,6 +86,9 @@ class Task:
             return self.decrypt_doc(doc)
         return doc
 
+    def list(self, queueName):
+        pass
+
     def decrypt_doc(self, doc):
         crypto = Fernet(self.cryptokey)
         doc['_id'] = str(doc['_id'])
@@ -100,3 +102,16 @@ class Task:
 
 class ModelException(Exception):
     pass
+
+class Rules:
+
+    def __init__(self):
+        self.rules_db = mongo.db.rules
+
+    def list_queues(self):
+        doc = self.rules_db.find_one()
+        queues = set()
+        for rule in doc['rules']:
+            if 'then' in rule and 'queue' in rule['then']:
+                queues.add(rule['then']['queue'])
+        return {'queues': list(queues)}

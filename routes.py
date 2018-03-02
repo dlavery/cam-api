@@ -2,6 +2,7 @@ from app import app
 from flask import request, escape
 from flask import jsonify
 from models import Task
+from models import Rules
 from models import ModelException
 
 @app.route('/', methods=['GET'])
@@ -46,6 +47,22 @@ def getTask(id):
     try:
         task = Task()
         res = task.read(id)
+        if not res:
+            return "Not found", 404
+        return jsonify(res)
+
+    except Exception as system_err:
+        app.logger.error(str(system_err))
+        return "Unexpected error", 500
+
+@app.route('/queues', methods=['GET'])
+def getQueues():
+    """
+    Get a list of active queues
+    """
+    try:
+        rules = Rules()
+        res = rules.list_queues()
         if not res:
             return "Not found", 404
         return jsonify(res)

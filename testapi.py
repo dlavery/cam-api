@@ -1,6 +1,7 @@
 import unittest
 import requests
 import json
+import random
 from datetime import date
 
 class TestAPI(unittest.TestCase):
@@ -9,6 +10,7 @@ class TestAPI(unittest.TestCase):
         pass
 
     def test_create(self):
+        priorities = ['high', 'medium', 'low']
         # create a task
         today = date.today().isoformat()
         payload = {
@@ -18,7 +20,7 @@ class TestAPI(unittest.TestCase):
             'origin': 'head office',
             'tags': '#news #uk',
             'notbefore': today,
-            'priority': 'high'
+            'priority': priorities[random.randint(0, 2)]
         }
         headers = {'Content-Type': 'application/json'}
         r = requests.post('http://localhost:5001/tasks', data=json.dumps(payload), headers=headers)
@@ -35,7 +37,7 @@ class TestAPI(unittest.TestCase):
         self.assertIn('#news', data['tags'])
         self.assertIn('#uk', data['tags'])
         self.assertEqual(data['notbefore'], today)
-        self.assertEqual(data['priority'], 'high')
+        self.assertIn(data['priority'], priorities)
         self.assertEqual(data['status'], 'PENDING')
 
 if __name__ == '__main__':

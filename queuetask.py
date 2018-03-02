@@ -1,37 +1,35 @@
 import configparser
 import pymongo
+import json
 from pymongo import MongoClient
-from utils import ruleset
+from bson.objectid import ObjectId
+from utils.ruleset import RuleSet
 
 def setup(db):
     INDEX_ASCENDING = 1
     INDEX_DESCENDING = -1
-    db.taskqueue.create_index([('queueName', INDEX_ASCENDING)], unique=False)
+    db.tasks.create_index([('queue', INDEX_ASCENDING),
+                ('notbefore', INDEX_ASCENDING),
+                ('priority', INDEX_ASCENDING),
+                ('timestamp', INDEX_ASCENDING)],
+                unique=False, sparse=True, background=True)
 
 if __name__ == '__main__':
+    # allocate tasks to a queue
     config = configparser.ConfigParser()
-    config.read('addressutils.cfg')
+    config.read('cam-api.cfg')
     client = MongoClient(config['DATABASE']['dbURI'])
     db = client[config['DATABASE']['dbName']]
     setup(db)
-
-    with open('queuerules.json') as f2:
-        rules_data = json.load(f2)
-        rs = RuleSet(rules_data)
-        results.append(rs.evaluate(person))
-
-    # bucket pattern, push to queue but upsert on full bucket
-    #db.taskqueue.update(
-    #    {'queueId': '1', '$where': 'this.items.length<4'},
-    #    {'$push': {'items': {'taskId': '5', 'status': '0'}}},
-    #    True)
-
-    # get list of queues
-    #db.getCollection('test').distinct('queueId')
-
-    # find a task in a queues
-    #db.taskqueue.find({'queue.taskId': {$eq: '1'}})
-    #db.taskqueue.update({'queue.taskId': {$eq: '1'}}, {$set: {'queue.$.status': '1'}})
-
-    # find queue names
-    #db.getCollection('test').distinct('queueName')
+    rules = db.rules.find_one()
+    rs = RuleSet(rules)
+    tasks = db.tasks.find({'status': 'PENDING'}).sort('timestamp', pymongo.ASCENDING)
+    processed = 0
+    for task in tasks:
+        task_id = str(task['_id'])
+        del task['_id']
+        rs.evaluate(task)
+        task['status'] = 'QUEUED'
+        res = db.tasks.replace_one({'_id': ObjectId(task_id)}, task)
+        processed = processed + 1
+    print('Number of tasks queued: ' + str(processed))

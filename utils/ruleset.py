@@ -21,18 +21,12 @@ class RuleSet:
                     self.current_node[attr] = True
             elif when[0] == 'ALL':
                 if type(self.subject[attr]) is list and type(when[1]) is list:
-                    if all([x in self.subject[attr]] for x in when[1]):
-                        self.current_node[attr] = True
-                    else:
-                        self.current_node[attr] = False
+                    self.current_node[attr] = all([x in self.subject[attr] for x in when[1]])
                 else:
                     self.current_node[attr] = False
             elif when[0] == 'ANY':
                 if type(self.subject[attr]) is list and type(when[1]) is list:
-                    if any([x in self.subject[attr]] for x in when[1]):
-                        self.current_node[attr] = True
-                    else:
-                        self.current_node[attr] = False
+                    self.current_node[attr] = any([x in self.subject[attr] for x in when[1]])
                 else:
                     self.current_node[attr] = False
             elif when[0] == 'IN':

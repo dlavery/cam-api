@@ -2,15 +2,23 @@
   "rules": [
     {
       "then": {
-        "queueName": "General"
+        "queue": "General"
       }
     },
     {
       "when": {
-        "tags": ["ANY", ["STORMZY"]]
+        "tags": ["ANY", ["#news", "#politics", "#business"]]
       },
       "then": {
-        "queueName": "News Team"
+        "queue": "News Team"
+      }
+    },
+    {
+      "when": {
+        "tags": ["ANY", ["#football", "#cricket", "#rugby"]]
+      },
+      "then": {
+        "queue": "Sports Team"
       }
     }
   ]

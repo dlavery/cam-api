@@ -85,6 +85,14 @@
     },
     {
       "when": {
+        "music": ["ANY", ["YES", "GENESIS"]]
+      },
+      "then": {
+        "status": "PROG"
+      }
+    },
+    {
+      "when": {
         "music": ["EQ", "STORMZY"]
       },
       "then": {
