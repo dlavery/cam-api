@@ -16,9 +16,10 @@ class Task:
     TASK_PRIORITIES = {'high': HIGH_PRIORITY, 'medium': MEDIUM_PRIORITY, 'low': LOW_PRIORITY}
 
     # Statuses
-    PENDING_STATUS = "PENDING"
-    IN_PROGRESS_STATUS = "IN_PROGRESS"
-    COMPLETE_STATUS = "COMPLETE"
+    STATUS = {'PENDING': 'PENDING',
+        'QUEUED': 'QUEUED',
+        'IN-PROGRESS': 'PROGRESS',
+        'COMPLETE': 'COMPLETE'}
 
     # DB parameters
     INDEX_ASCENDING = 1
@@ -28,17 +29,20 @@ class Task:
         today = date.today().isoformat()
         self.PRIORITIES = {v: k for k, v in self.TASK_PRIORITIES.items()}
         self.tasks_db = mongo.db.tasks
-        self.tasks_db.create_index([
-            ('status', self.INDEX_ASCENDING),
+        self.tasks_db.tasks.create_index([('status', self.INDEX_ASCENDING),
             ('timestamp', self.INDEX_ASCENDING)],
             unique=False, background=True)
+        self.tasks_db.tasks.create_index([('queue', self.INDEX_ASCENDING),
+            ('notbefore', self.INDEX_ASCENDING),
+            ('priority', self.INDEX_ASCENDING),
+            ('timestamp', self.INDEX_ASCENDING)],
+            unique=False, sparse=True, background=True)
         self.title = ''
         self.description = ''
-        self.url = ''
-        self.origin = ''
+        self.requester = ''
         self.tags = ''
         self.notbefore = today
-        self.status = self.PENDING_STATUS
+        self.status = self.STATUS['PENDING']
         self.statusdate = today
         self.priority = self.PRIORITIES[self.MEDIUM_PRIORITY]
         self.cryptokey = config['CRYPTO']['cryptoKey']
@@ -48,37 +52,21 @@ class Task:
         if err:
             raise ModelException(err)
         crypto = Fernet(self.cryptokey)
-        task_id = self.tasks_db.insert({
+        doc = {
             'title': crypto.encrypt(self.title.encode()).decode(),
             'description': crypto.encrypt(self.description.encode()).decode(),
-            'url': self.url,
-            'origin': self.origin,
+            'requester': self.requester,
             'tags': re.split('\s+', self.tags),
             'notbefore': self.notbefore,
             'priority': self.TASK_PRIORITIES[self.priority],
             'status': self.status,
             'statusdate': self.statusdate,
             'timestamp': datetime.utcnow().timestamp()
-            })
+        }
+        if self.url:
+            doc['url'] = self.url
+        task_id = self.tasks_db.insert(doc)
         return str(task_id)
-
-    def validate(self):
-        if not self.title:
-            return "title is mandatory"
-        elif not self.description:
-            return "description is mandatory"
-        elif not self.url:
-            return "url is mandatory"
-        elif not self.tags:
-            return "tags is mandatory"
-        elif not self.origin:
-            return "origin is mandatory"
-        elif (self.priority not in self.TASK_PRIORITIES):
-            return "priority must be high, medium or low"
-        elif not url(self.url):
-            return "invalid task url"
-        else:
-            return False
 
     def read(self, task_id):
         doc = self.tasks_db.find_one({'_id': ObjectId(task_id)})
@@ -86,8 +74,66 @@ class Task:
             return self.decrypt_doc(doc)
         return doc
 
-    def list(self, queueName):
-        pass
+    def list(self, queueName, limit):
+        today = date.today().isoformat()
+        docs = self.tasks_db.find({'queue': queueName, 'status': self.STATUS['QUEUED'], 'notbefore': {'$lte': today}}).sort([
+            ('priority', self.INDEX_ASCENDING),
+            ('notbefore', self.INDEX_ASCENDING),
+            ('timestamp', self.INDEX_ASCENDING)
+        ]).limit(limit)
+        clearDocs = []
+        for doc in docs:
+            clearDocs.append(self.decrypt_doc(doc))
+        return {'tasks': clearDocs}
+
+    def update(self, doc):
+        update_pending = False
+        today = date.today().isoformat()
+        newtimestamp = datetime.utcnow().timestamp()
+        if '_id' not in doc:
+            raise ModelException('document _id missing')
+        if 'timestamp' not in doc:
+            raise ModelException('document timestamp missing')
+        if 'notbefore' in doc:
+            update_pending = True
+            if doc['notbefore'] > today:
+                try:
+                    l = doc['notbefore'].split('-')
+                    d = date(int(l[0]), int(l[1]), int(l[2]))
+                except Exception as err:
+                    raise ModelException('notbefore must be YYYY-MM-DD')
+                else:
+                    raise ModelException('notbefore must be YYYY-MM-DD and in future')
+        if 'status' in doc:
+            update_pending = True
+            doc['statusdate'] = today
+            if doc['status'] not in self.STATUS:
+                raise ModelException('invalid status')
+        if 'note' in doc:
+            update_pending = True
+            doc['note']['timestamp'] = newtimestamp
+            if 'text' not in doc['note'] or 'originator' not in doc['note'] \
+            or not doc['note']['text'] or not doc['note']['originator']:
+                raise ModelException('note must contain text and originator')
+        if not update_pending:
+            return 0
+        updateclause = {}
+        updateclause['$set'] = {'timestamp': newtimestamp}
+        if 'notbefore' in doc:
+            updateclause['$set']['notbefore'] = doc['notbefore']
+        if 'status' in doc:
+            updateclause['$set']['status'] = self.STATUS[doc['status']]
+            updateclause['$set']['statusdate'] = doc['statusdate']
+        if 'note' in doc:
+            updateclause['$push'] = {'notes': {'text': doc['note']['text'], 'originator': doc['note']['originator'], 'timestamp': doc['note']['timestamp']}}
+        # update document inc timestamp in query to ensure no change since read
+        res = self.tasks_db.update_one(
+            {'_id': ObjectId(doc['_id']), 'timestamp': doc['timestamp']},
+            updateclause)
+        if res.modified_count == 0:
+            raise ConcurrencyException('task has been updated by another user')
+        else:
+            return res.modified_count
 
     def decrypt_doc(self, doc):
         crypto = Fernet(self.cryptokey)
@@ -100,7 +146,26 @@ class Task:
             doc['priority'] = self.PRIORITIES[doc['priority']]
         return doc
 
+    def validate(self):
+        if not self.title:
+            return "title is mandatory"
+        elif not self.description:
+            return "description is mandatory"
+        elif not self.tags:
+            return "tags is mandatory"
+        elif not self.requester:
+            return "requester is mandatory"
+        elif (self.priority not in self.TASK_PRIORITIES):
+            return "priority must be high, medium or low"
+        elif url and not url(self.url):
+            return "invalid task url"
+        else:
+            return False
+
 class ModelException(Exception):
+    pass
+
+class ConcurrencyException(Exception):
     pass
 
 class Rules:

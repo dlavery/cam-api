@@ -9,6 +9,12 @@ class TestAPI(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_queues(self):
+        r = requests.get('http://localhost:5001/queues')
+        data = r.json()
+        r = data['queues']
+        self.assertEqual(True, all([e in r for e in ['General', 'News Team', 'Sports Team']]))
+
     def test_create(self):
         priorities = ['high', 'medium', 'low']
         # create a task
@@ -17,7 +23,7 @@ class TestAPI(unittest.TestCase):
             'title': 'news',
             'description': 'check the news',
             'url': 'http://bbc.co.uk/news',
-            'origin': 'head office',
+            'requester': 'head office',
             'tags': '#news #uk',
             'notbefore': today,
             'priority': priorities[random.randint(0, 2)]
@@ -33,7 +39,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(data['title'], 'news')
         self.assertEqual(data['description'], 'check the news')
         self.assertEqual(data['url'], 'http://bbc.co.uk/news')
-        self.assertEqual(data['origin'], 'head office')
+        self.assertEqual(data['requester'], 'head office')
         self.assertIn('#news', data['tags'])
         self.assertIn('#uk', data['tags'])
         self.assertEqual(data['notbefore'], today)
