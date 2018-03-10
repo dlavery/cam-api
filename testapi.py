@@ -36,7 +36,7 @@ class TestAPI(unittest.TestCase):
             'description': 'check the news',
             'url': 'http://bbc.co.uk/news',
             'requester': 'head office',
-            'tags': '#news #uk',
+            'tags': ['#news', '#uk'],
             'notbefore': today,
             'priority': self.priorities[random.randint(0, 2)]
         }
@@ -64,7 +64,7 @@ class TestAPI(unittest.TestCase):
             'description': 'check the news',
             'url': 'http://bbc.co.uk/news',
             'requester': 'head office',
-            'tags': '#news #uk',
+            'tags': ['#news', '#uk'],
             'notbefore': today,
             'priority': self.priorities[random.randint(0, 2)]
         }
@@ -95,7 +95,7 @@ class TestAPI(unittest.TestCase):
             'description': 'check the news',
             'url': 'http://bbc.co.uk/news',
             'requester': 'head office',
-            'tags': '#news #uk',
+            'tags': ['#news', '#uk'],
             'notbefore': today,
             'priority': self.priorities[random.randint(0, 2)]
         }
@@ -130,7 +130,7 @@ class TestAPI(unittest.TestCase):
             'description': 'check the news',
             'url': 'http://bbc.co.uk/news',
             'requester': 'head office',
-            'tags': '#news #uk',
+            'tags': ['#news', '#uk'],
             'notbefore': today,
             'priority': self.priorities[random.randint(0, 2)]
         }

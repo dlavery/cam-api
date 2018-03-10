@@ -1,0 +1,275 @@
+swagger: "2.0"
+info:
+  description: "This is a demo set of APIs to allow a client application to implement a simple case/work management service, see https://github.com/dlavery/cam-api for the associated code."
+  version: "0.1.0"
+  title: "CAM API"
+  termsOfService: "http://swagger.io/terms/"
+  license:
+    name: "MIT"
+host: "localhost"
+basePath: "/"
+schemes:
+- "http"
+paths:
+  /queues:
+    get:
+      tags:
+      - "queues"
+      summary: "Get a list of active work queues"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Queues"
+        404:
+          description: "Not found"
+        500:
+          description: "Unexpected error"
+  /queues/{queue}/{limit}:
+    get:
+      tags:
+      - "queues"
+      summary: "Get a list of tasks in a queue"
+      description: "Get a list of tasks in a queue - use this with a limit == 1 if you want to pull one task at a time and update task status to 'IN PROGRESS'. If you're not happy with the default prioritisation and wish to manage queue concurrency within the client application then use limit == 0 for all tasks or limit == n to get a number of tasks - in this case tasks will not be updated to 'IN_PROGRESS'."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "queue"
+        in: "path"
+        description: "Queue name"
+        required: true
+        type: "string"
+      - name: "limit"
+        in: "path"
+        description: "Number of tasks to return"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Tasklist"
+        404:
+          description: "Not found"
+        500:
+          description: "Unexpected error"
+  /tasks:
+    post:
+      tags:
+      - "tasks"
+      summary: "Add a task to the tasks collection"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "task"
+        in: "body"
+        required: true
+        schema:
+          type: object
+          properties:
+            description:
+              type: string
+            notbefore:
+              type: string
+              format: "YYYY-MM-DD"
+            priority:
+              $ref: "#/definitions/Priority"
+            requester:
+              type: string
+            tags:
+              type: array
+              items:
+                type: string
+            title:
+              type: string
+            url:
+              type: string
+              format: uri
+      responses:
+        200:
+          description: "Success"
+          schema:
+            type: object
+            properties:
+              _id:
+                type: string
+        400:
+          description: "Bad request"
+        500:
+          description: "Unexpected error"
+  /tasks/{id}:
+    get:
+      tags:
+      - "tasks"
+      summary: "Get a task"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Task"
+        404:
+          description: "Not found"
+        500:
+          description: "Unexpected error"
+  /tasks/requeue/{id}:
+    put:
+      tags:
+      - "tasks"
+      summary: "Re-queue a task for a later date"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "update"
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            notbefore:
+              type: string
+              format: 'YYYY-MM-DD'
+            note:
+              type: string
+            priority:
+              $ref: "#/definitions/Priority"
+            updater:
+              type: string
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: object
+            properties:
+              updated:
+                type: integer
+        404:
+          description: "Not found"
+        500:
+          description: "Unexpected error"
+  /tasks/complete/{id}:
+    put:
+      tags:
+      - "tasks"
+      summary: "Mark a task complete"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "update"
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            note:
+              type: string
+            updater:
+              type: string
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: object
+            properties:
+              updated:
+                type: integer
+        404:
+          description: "Not found"
+        500:
+          description: "Unexpected error"
+definitions:
+  Queues:
+    type: "object"
+    properties:
+      queues:
+        type: array
+        items:
+          type: "string"
+  Tasklist:
+    type: "object"
+    properties:
+      tasks:
+        type: array
+        items:
+          $ref: "#/definitions/Task"
+  Task:
+    type: "object"
+    properties:
+      id:
+        type: string
+      description:
+        type: string
+      notbefore:
+        type: string
+        format: "YYYY-MM-DD"
+      notes:
+        type: array
+        items:
+          type: object
+          properties:
+            text:
+              type: string
+            originator: 
+              type: string
+            ondate: 
+              type: string
+              format: "YYYY-MM-DD"
+      priority:
+        $ref: "#/definitions/Priority"
+      queue:
+        type: string
+      requester:
+        type: string
+      status:
+        type: string
+      statusdate:
+        type: string
+        format: "YYYY-MM-DD"
+      tags:
+        type: array
+        items:
+          type: string
+      timestamp:
+        type: number
+      title:
+        type: string
+      updater:
+        type: string
+      url:
+        type: string
+        format: uri
+  Priority:
+    type: string
+    enum:
+    - "high"
+    - "medium"
+    - "low"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"

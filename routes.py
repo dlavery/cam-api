@@ -28,7 +28,7 @@ def getQueues():
 @app.route('/queues/<string:qname>/<int:lim>', methods=['GET'])
 def getQueueTasks(qname, lim):
     """
-    Get a list of tasks in a queue - use this if with a limit = 1 if you want to
+    Get a list of tasks in a queue - use this with a limit = 1 if you want to
     pull one task at a time and update task status to "IN PROGRESS".
 
     if you're not happy with the default prioritisation and wish
@@ -44,7 +44,7 @@ def getQueueTasks(qname, lim):
             res = task.list(qname, lim)
             if not res or len(res['tasks']) == 0:
                 break
-            if len(res['tasks']) == 1:
+            if lim == 1:
                 doc = res['tasks'][0]
                 try:
                     # update the document so it isn't returned next time
@@ -79,7 +79,7 @@ def addTask():
         if 'url' in request.json:
             task.url = request.json['url']
         if 'tags' in request.json:
-            task.tags = escape(request.json['tags'])
+            task.tags = request.json['tags']
         if 'requester' in request.json:
             task.requester = escape(request.json['requester'])
         if 'priority' in request.json:

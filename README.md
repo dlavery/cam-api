@@ -10,6 +10,10 @@ The following utilities are also included:
 ## API
 The API will expose functionality to create tasks. A background (cron) job will assign tasks to work queues. The API will expose an endpoint to draw the next task from the queue on a priority basis. It is intended to wrap auth (see the repo in this account) around the API to secure it. It is also intended that in the wild this API would be protected by a gateway such as Kong (http://getkong.org).
 
+See curl.sh for example API calls, run the tests in testapi.py, and check out swagger.yaml.
+
+NOTE: run queuetask.py to queue tasks ready to pull.
+
 ## Utilities
 
 ### encrypt/decrypt

@@ -40,7 +40,7 @@ class Task:
         self.title = ''
         self.description = ''
         self.requester = ''
-        self.tags = ''
+        self.tags = None
         self.notbefore = today
         self.status = self.STATUS['PENDING']
         self.statusdate = today
@@ -56,7 +56,7 @@ class Task:
             'title': crypto.encrypt(self.title.encode()).decode(),
             'description': crypto.encrypt(self.description.encode()).decode(),
             'requester': self.requester,
-            'tags': re.split('\s+', self.tags),
+            'tags': self.tags,
             'notbefore': self.notbefore,
             'priority': self.TASK_PRIORITIES[self.priority],
             'status': self.status,
@@ -171,6 +171,9 @@ class Task:
         elif url and not url(self.url):
             return "invalid task url"
         else:
+            for tag in self.tags:
+                if not re.match('^#[A-Za-z]{1}[A-Za-z0-9-_]*[A-Za-z0-9]{1}$', tag):
+                    return "invalid tag, should be #[A-Za-z]{1}[A-Za-z0-9_-]*[A-Za-z0-9]{1}"
             return False
 
 class ModelException(Exception):
