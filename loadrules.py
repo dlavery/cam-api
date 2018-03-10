@@ -3,8 +3,8 @@ import pymongo
 import json
 from pymongo import MongoClient
 
-if __name__ == '__main__':
-    # load rukes into the DB
+def loadrules():
+    # load rules into the DB
     config = configparser.ConfigParser()
     config.read('cam-api.cfg')
     client = MongoClient(config['DATABASE']['dbURI'])
@@ -13,4 +13,7 @@ if __name__ == '__main__':
     with open('queuerules.json') as f:
         rules_data = json.load(f)
     db.rules.insert_one(rules_data)
+
+if __name__ == '__main__':
+    loadrules()
     print('Rules updated')

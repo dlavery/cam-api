@@ -69,7 +69,11 @@ class Task:
         return str(task_id)
 
     def read(self, task_id):
-        doc = self.tasks_db.find_one({'_id': ObjectId(task_id)})
+        try:
+            id = ObjectId(task_id)
+        except Exception as err:
+            return None
+        doc = self.tasks_db.find_one({'_id': id})
         if doc:
             return self.decrypt_doc(doc)
         return doc
@@ -102,8 +106,12 @@ class Task:
                     d = date(int(l[0]), int(l[1]), int(l[2]))
                 except Exception as err:
                     raise ModelException('notbefore must be YYYY-MM-DD')
-                else:
-                    raise ModelException('notbefore must be YYYY-MM-DD and in future')
+            else:
+                raise ModelException('notbefore must be YYYY-MM-DD and in future')
+        if 'priority' in doc:
+            update_pending = True
+            if doc['priority'] not in self.TASK_PRIORITIES:
+                raise ModelException('invalid priority')
         if 'status' in doc:
             update_pending = True
             doc['statusdate'] = today
@@ -111,7 +119,6 @@ class Task:
                 raise ModelException('invalid status')
         if 'note' in doc:
             update_pending = True
-            doc['note']['timestamp'] = newtimestamp
             if 'text' not in doc['note'] or 'originator' not in doc['note'] \
             or not doc['note']['text'] or not doc['note']['originator']:
                 raise ModelException('note must contain text and originator')
@@ -119,13 +126,17 @@ class Task:
             return 0
         updateclause = {}
         updateclause['$set'] = {'timestamp': newtimestamp}
+        if 'updater' in doc:
+            updateclause['$set']['updater'] = doc['updater']
         if 'notbefore' in doc:
             updateclause['$set']['notbefore'] = doc['notbefore']
+        if 'priority' in doc:
+            updateclause['$set']['priority'] = self.TASK_PRIORITIES[doc['priority']]
         if 'status' in doc:
             updateclause['$set']['status'] = self.STATUS[doc['status']]
             updateclause['$set']['statusdate'] = doc['statusdate']
         if 'note' in doc:
-            updateclause['$push'] = {'notes': {'text': doc['note']['text'], 'originator': doc['note']['originator'], 'timestamp': doc['note']['timestamp']}}
+            updateclause['$push'] = {'notes': {'text': doc['note']['text'], 'originator': doc['note']['originator'], 'ondate': today}}
         # update document inc timestamp in query to ensure no change since read
         res = self.tasks_db.update_one(
             {'_id': ObjectId(doc['_id']), 'timestamp': doc['timestamp']},

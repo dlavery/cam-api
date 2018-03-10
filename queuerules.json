@@ -10,7 +10,7 @@
         "tags": ["ANY", ["#news", "#politics", "#business"]]
       },
       "then": {
-        "queue": "News Team"
+        "queue": "NewsTeam"
       }
     },
     {
@@ -18,7 +18,7 @@
         "tags": ["ANY", ["#football", "#cricket", "#rugby"]]
       },
       "then": {
-        "queue": "Sports Team"
+        "queue": "SportsTeam"
       }
     }
   ]
