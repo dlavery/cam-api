@@ -22,6 +22,13 @@ class TestAPI(unittest.TestCase):
         self.db.tasks.delete_many({})
         self.priorities = ['high', 'medium', 'low']
 
+    def tearDown(self):
+        self.db.tasks.delete_many({})
+
+    def _create_task(self, payload):
+        r = requests.post('http://localhost:5001/tasks', data=json.dumps(payload), headers={'Content-Type': 'application/json'})
+        return r.json()
+
     def test_queues(self):
         r = requests.get('http://localhost:5001/queues')
         data = r.json()
@@ -150,13 +157,6 @@ class TestAPI(unittest.TestCase):
         doc = self.db.tasks.find_one({})
         self.assertEqual(doc['status'], Task.STATUS['COMPLETE'])
         self.assertEqual(doc['statusdate'], today)
-
-    def _create_task(self, payload):
-        r = requests.post('http://localhost:5001/tasks', data=json.dumps(payload), headers={'Content-Type': 'application/json'})
-        return r.json()
-
-    def tearDown(self):
-        self.db.tasks.delete_many({})
 
 if __name__ == '__main__':
     unittest.main()

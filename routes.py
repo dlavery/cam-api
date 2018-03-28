@@ -52,6 +52,8 @@ def getQueueTasks(qname, lim):
                     if upd > 0:
                         doc['status'] = Task.STATUS['IN-PROGRESS']
                         queuedocs.append(doc)
+                    else:
+                        raise Exception('unexpected update failure')
                 except ConcurrencyException as concurrrent_err:
                     pass
             else:

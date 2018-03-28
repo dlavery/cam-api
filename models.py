@@ -28,7 +28,7 @@ class Task:
     def __init__(self):
         today = date.today().isoformat()
         self.PRIORITIES = {v: k for k, v in self.TASK_PRIORITIES.items()}
-        self.tasks_db = mongo.db.tasks
+        self.tasks_db = mongo.db
         self.tasks_db.tasks.create_index([('status', self.INDEX_ASCENDING),
             ('timestamp', self.INDEX_ASCENDING)],
             unique=False, background=True)
@@ -65,7 +65,7 @@ class Task:
         }
         if self.url:
             doc['url'] = self.url
-        task_id = self.tasks_db.insert(doc)
+        task_id = self.tasks_db.tasks.insert(doc)
         return str(task_id)
 
     def read(self, task_id):
@@ -73,14 +73,14 @@ class Task:
             id = ObjectId(task_id)
         except Exception as err:
             return None
-        doc = self.tasks_db.find_one({'_id': id})
+        doc = self.tasks_db.tasks.find_one({'_id': id})
         if doc:
             return self.decrypt_doc(doc)
         return doc
 
     def list(self, queueName, limit):
         today = date.today().isoformat()
-        docs = self.tasks_db.find({'queue': queueName, 'status': self.STATUS['QUEUED'], 'notbefore': {'$lte': today}}).sort([
+        docs = self.tasks_db.tasks.find({'queue': queueName, 'status': self.STATUS['QUEUED'], 'notbefore': {'$lte': today}}).sort([
             ('priority', self.INDEX_ASCENDING),
             ('notbefore', self.INDEX_ASCENDING),
             ('timestamp', self.INDEX_ASCENDING)
@@ -100,23 +100,20 @@ class Task:
             raise ModelException('document timestamp missing')
         if 'notbefore' in doc:
             update_pending = True
-            if doc['notbefore'] > today:
-                try:
-                    l = doc['notbefore'].split('-')
-                    d = date(int(l[0]), int(l[1]), int(l[2]))
-                except Exception as err:
-                    raise ModelException('notbefore must be YYYY-MM-DD')
-            else:
-                raise ModelException('notbefore must be YYYY-MM-DD and in future')
+            err = self.validate_notbefore(doc['notbefore'])
+            if err:
+                raise ModelException(err)
         if 'priority' in doc:
             update_pending = True
-            if doc['priority'] not in self.TASK_PRIORITIES:
-                raise ModelException('invalid priority')
+            err = self.validate_priority(doc['priority'])
+            if err:
+                raise ModelException(err)
         if 'status' in doc:
             update_pending = True
             doc['statusdate'] = today
-            if doc['status'] not in self.STATUS:
-                raise ModelException('invalid status')
+            err = self.validate_status(doc['status'])
+            if err:
+                raise ModelException(err)
         if 'note' in doc:
             update_pending = True
             if 'text' not in doc['note'] or 'originator' not in doc['note'] \
@@ -138,7 +135,7 @@ class Task:
         if 'note' in doc:
             updateclause['$push'] = {'notes': {'text': doc['note']['text'], 'originator': doc['note']['originator'], 'ondate': today}}
         # update document inc timestamp in query to ensure no change since read
-        res = self.tasks_db.update_one(
+        res = self.tasks_db.tasks.update_one(
             {'_id': ObjectId(doc['_id']), 'timestamp': doc['timestamp']},
             updateclause)
         if res.modified_count == 0:
@@ -160,21 +157,63 @@ class Task:
     def validate(self):
         if not self.title:
             return "title is mandatory"
-        elif not self.description:
+        if not self.description:
             return "description is mandatory"
-        elif not self.tags:
+        if not self.tags:
             return "tags is mandatory"
-        elif not self.requester:
+        if not self.requester:
             return "requester is mandatory"
-        elif (self.priority not in self.TASK_PRIORITIES):
-            return "priority must be high, medium or low"
-        elif url and not url(self.url):
-            return "invalid task url"
+        if self.notbefore:
+            err = self.validate_notbefore(self.notbefore)
+            if err:
+                return err
+        err = self.validate_status(self.status)
+        if err:
+            return err
+        err = self.validate_priority(self.priority)
+        if err:
+            return err
+        if self.url:
+            err = self.validate_url(self.url)
+            if err:
+                return err
+        for tag in self.tags:
+            err = self.validate_tag(tag)
+            if err:
+                return err
+        return False
+
+    def validate_priority(self, priority):
+        if priority not in self.TASK_PRIORITIES:
+            return "invalid priority"
+        return False
+
+    def validate_tag(self, tag):
+        if not re.match('^#[A-Za-z]{1}[A-Za-z0-9-_]*[A-Za-z0-9]{1}$', tag):
+            return "invalid tag, should be #[A-Za-z]{1}[A-Za-z0-9_-]*[A-Za-z0-9]{1}"
+        return False
+
+    def validate_notbefore(self, notbefore):
+        today = date.today().isoformat()
+        if notbefore >= today:
+            try:
+                l = notbefore.split('-')
+                d = date(int(l[0]), int(l[1]), int(l[2]))
+            except Exception as err:
+                return "notbefore must be YYYY-MM-DD"
         else:
-            for tag in self.tags:
-                if not re.match('^#[A-Za-z]{1}[A-Za-z0-9-_]*[A-Za-z0-9]{1}$', tag):
-                    return "invalid tag, should be #[A-Za-z]{1}[A-Za-z0-9_-]*[A-Za-z0-9]{1}"
-            return False
+            return "notbefore must be YYYY-MM-DD and equal today or later"
+        return False
+
+    def validate_status(self, status):
+        if status not in self.STATUS:
+            return "invalid status"
+        return False
+
+    def validate_url(self, u):
+        if not url(u):
+            return "invalid task url"
+        return False
 
 class ModelException(Exception):
     pass
